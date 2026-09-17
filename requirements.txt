@@ -1,0 +1,2 @@
+# 本项目核心 Agent Runtime 从零实现，仅依赖 Python 标准库（>=3.9），无第三方依赖。
+# DeepSeek API 通过 urllib 直连，无需安装 openai SDK。
