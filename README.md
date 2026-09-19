@@ -1,7 +1,7 @@
 # minagent — 从零实现的最小可用 Agent
 
 一个不依赖任何 Agent 框架（langgraph / openhands / openclaw）的最小可用 Agent Runtime。
-核心 Agent Runtime 自行实现，LLM 通过标准库直连 DeepSeek（OpenAI-compatible）接口。
+核心 Agent Runtime 自行实现，LLM 通过标准库直连 OpenAI-compatible 接口（可配置任意端点）。
 
 - 代码链接：`<在此填写你的 GitHub 仓库地址>`
 - 语言：Python（>=3.9，零第三方依赖，仅标准库）
@@ -10,22 +10,30 @@
 
 ## 一、运行方式
 
-### 1. 环境变量（必须）
+### 1. 配置（必须）
+
+复制 `.env.example` 为 `.env` 并填入真实值（`.env` 已在 `.gitignore` 中，**不会上传 GitHub**）：
 
 ```bash
+# 或直接设置环境变量
+
 # Linux / macOS
-export DEEPSEEK_API_KEY="sk-xxxxxxxx"
+export MINAGENT_API_KEY="你的密钥"
 
 # Windows PowerShell
-$env:DEEPSEEK_API_KEY="sk-xxxxxxxx"
+$env:MINAGENT_API_KEY="你的密钥"
 ```
 
 可选配置（均有默认值，见 `.env.example`）：
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|
-| `MINAGENT_BASE_URL` | `https://api.deepseek.com` | OpenAI-compatible 端点 |
-| `MINAGENT_MODEL` | `deepseek-chat` | `deepseek-chat` 支持 function calling；`deepseek-reasoner` 会返回思考过程 |
+| `MINAGENT_API_KEY` | — | API 密钥（必填，放在 `.env` 或环境变量，勿硬编码） |
+| `MINAGENT_BASE_URL` | `https://note3-prev-api.askdiandian.com/v1` | OpenAI-compatible 端点 |
+| `MINAGENT_MODEL` | `dots3-note-prev` | 模型名 |
+| `MINAGENT_AUTH_HEADER` | `api-key` | 认证请求头名 |
+| `MINAGENT_AUTH_PREFIX` | 空 | 认证值前缀（如 `Bearer `），本接口留空 |
+| `MINAGENT_MAX_TOKENS` | `0` | 0 表示不限制；>0 时限制最大生成 token |
 | `MINAGENT_MAX_STEPS` | `10` | 单轮回合内最大工具调用轮次 |
 | `MINAGENT_MAX_CONTEXT_MESSAGES` | `20` | 消息数超过该阈值触发压缩 |
 | `MINAGENT_KEEP_RECENT_MESSAGES` | `6` | 压缩时保留最近原文条数 |
@@ -78,7 +86,7 @@ CLI (__main__.py)
 ┌───────────────┐      ┌──────────────────────┐
 │ LLMClient      │      │ ToolRegistry          │
 │ (llm.py)       │      │ (tools/registry.py)   │
-│ 直连 DeepSeek  │      │ calculator/search/todo │
+│ 直连 LLM API   │      │ calculator/search/todo │
 └───────────────┘      └──────────────────────┘
         │
         ▼
@@ -119,7 +127,7 @@ CLI (__main__.py)
 
 `parse_step()` 从一轮响应中提取三种候选：
 
-- `reasoning_content`（思考过程）— 仅 deepseek-reasoner 返回
+- `reasoning_content`（思考过程）— 仅部分推理模型返回
 - `tool_calls`（工具调用）— 非法 JSON arguments 降级为空 dict
 - `content`（最终答案）
 

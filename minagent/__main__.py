@@ -27,7 +27,15 @@ def build_agent(config: Config) -> tuple[Agent, SessionManager]:
     registry.register(search_tool)
     registry.register(todo_tool)
 
-    llm = LLMClient(config.base_url, config.api_key, config.model, config.timeout)
+    llm = LLMClient(
+        config.base_url,
+        config.api_key,
+        config.model,
+        config.timeout,
+        config.auth_header,
+        config.auth_prefix,
+        config.max_tokens,
+    )
     agent = Agent(config, llm, registry)
     manager = SessionManager(SYSTEM_PROMPT)
     return agent, manager

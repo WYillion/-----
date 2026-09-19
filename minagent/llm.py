@@ -15,11 +15,23 @@ class LLMError(RuntimeError):
 
 
 class LLMClient:
-    def __init__(self, base_url: str, api_key: str, model: str, timeout: int = 60) -> None:
+    def __init__(
+        self,
+        base_url: str,
+        api_key: str,
+        model: str,
+        timeout: int = 60,
+        auth_header: str = "api-key",
+        auth_prefix: str = "",
+        max_tokens: int = 0,
+    ) -> None:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
         self.timeout = timeout
+        self.auth_header = auth_header
+        self.auth_prefix = auth_prefix
+        self.max_tokens = max_tokens
 
     @property
     def endpoint(self) -> str:
@@ -40,6 +52,8 @@ class LLMClient:
             payload["tools"] = tools
         if temperature is not None:
             payload["temperature"] = temperature
+        if self.max_tokens > 0:
+            payload["max_tokens"] = self.max_tokens
 
         data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         request = urllib.request.Request(
@@ -48,7 +62,7 @@ class LLMClient:
             method="POST",
             headers={
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {self.api_key}",
+                self.auth_header: self.auth_prefix + self.api_key,
             },
         )
 
