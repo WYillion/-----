@@ -3,7 +3,6 @@
 一个不依赖任何 Agent 框架（langgraph / openhands / openclaw）的最小可用 Agent Runtime。
 核心 Agent Runtime 自行实现，LLM 通过标准库直连 OpenAI-compatible 接口（可配置任意端点）。
 
-- 代码链接：`<在此填写你的 GitHub 仓库地址>`
 - 语言：Python（>=3.9，零第三方依赖，仅标准库）
 
 ---
